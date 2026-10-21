@@ -27,3 +27,7 @@
 ## 퀴즈
 
 [▶ 퀴즈 풀기](https://dnsxkm.github.io/database/중간고사_정리/퀴즈/): 정리 내용으로 만든 자가 점검 퀴즈 (GitHub Pages). 소스는 [퀴즈/index.html](퀴즈/index.html).
+
+## 빈칸 노트
+
+[▶ 빈칸 풀기](https://dnsxkm.github.io/database/중간고사_정리/빈칸/): 정리 내용을 빈칸 311개로 만든 노트. 직접 입력해 채점하는 입력 모드와 눌러서 정답을 보는 탭 모드가 있어요. 소스는 [빈칸/index.html](빈칸/index.html).
