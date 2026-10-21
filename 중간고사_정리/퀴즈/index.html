@@ -1,0 +1,531 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>데이터베이스응용 중간고사 퀴즈</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans+KR:wght@400;500;700&display=swap">
+<style>
+/* Layout: OMR 답안지 — 한 문항씩 보는 시험지 카드 + 위쪽 번호 마킹 줄 (알고리즘 퀴즈와 같은 구성, 서술형 자가채점 추가) */
+:root{
+  --paper:#f3f5f8; --card:#ffffff; --ink:#1a2230; --muted:#5b6575; --line:#d5dbe4;
+  --omr:#2456c7; --omr-soft:#e3ebfb; --ok:#2b8a3e; --ok-soft:#e6f4ea; --bad:#c92a2a; --bad-soft:#fdecec;
+  --hl:#fff176; --hl-ink:#5c4b00; --code-bg:#eef1f5;
+  --f-body:"IBM Plex Sans KR","Apple SD Gothic Neo","Malgun Gothic",system-ui,sans-serif;
+  --f-mono:"IBM Plex Mono",ui-monospace,Menlo,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --paper:#11151c; --card:#1a1f28; --ink:#e6e9ef; --muted:#9aa3b2; --line:#2e3542;
+  --omr:#7ea2ff; --omr-soft:#1f2a45; --ok:#51cf66; --ok-soft:#1c3324; --bad:#ff6b6b; --bad-soft:#3a1e1e;
+  --hl:#5c5214; --hl-ink:#fff3a8; --code-bg:#232a35; color-scheme:dark }}
+:root[data-theme="dark"]{
+  --paper:#11151c; --card:#1a1f28; --ink:#e6e9ef; --muted:#9aa3b2; --line:#2e3542;
+  --omr:#7ea2ff; --omr-soft:#1f2a45; --ok:#51cf66; --ok-soft:#1c3324; --bad:#ff6b6b; --bad-soft:#3a1e1e;
+  --hl:#5c5214; --hl-ink:#fff3a8; --code-bg:#232a35; color-scheme:dark }
+*{box-sizing:border-box}
+body{background:var(--paper);color:var(--ink);font-family:var(--f-body);font-size:15px;line-height:1.6;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:28px 48px}
+.wrap{max-width:760px;margin:0 auto;display:flex;flex-direction:column;gap:20px}
+header h1{font-size:1.6rem;margin:0;letter-spacing:-.01em;text-wrap:balance}
+header p{margin:4px 0 0;color:var(--muted);font-size:.9rem}
+.meta{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+.pill{font-size:.75rem;padding:2px 9px;border-radius:99px;border:1px solid var(--line);color:var(--muted);white-space:nowrap}
+.pill.hl{background:var(--hl);border-color:var(--hl);color:var(--hl-ink)}
+code,.mono{font-family:var(--f-mono);font-size:.9em}
+code{background:var(--code-bg);padding:1px 5px;border-radius:4px}
+pre{background:var(--code-bg);padding:10px 12px;border-radius:6px;overflow-x:auto;font-family:var(--f-mono);font-size:.85rem;line-height:1.5;margin:8px 0}
+mark{background:var(--hl);color:var(--hl-ink);padding:0 2px;border-radius:2px}
+
+.controls{display:flex;flex-direction:column;gap:12px}
+.row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.label{font-size:.75rem;letter-spacing:.06em;color:var(--muted);min-width:44px}
+.seg button,.chip{font:inherit;font-size:.85rem;border:1px solid var(--line);background:var(--card);color:var(--ink);padding:5px 12px;border-radius:6px;cursor:pointer}
+.seg button[aria-pressed="true"],.chip[aria-pressed="true"]{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px solid var(--omr);outline-offset:2px}
+
+.omr{display:flex;flex-wrap:wrap;gap:6px}
+.omr button{width:30px;height:30px;border-radius:50%;border:1.5px solid var(--omr);background:transparent;color:var(--omr);font-family:var(--f-mono);font-size:.72rem;cursor:pointer;padding:0;font-variant-numeric:tabular-nums}
+.omr button.ok{background:var(--ok);border-color:var(--ok);color:var(--card)}
+.omr button.bad{background:var(--bad);border-color:var(--bad);color:var(--card)}
+.omr button.cur{box-shadow:0 0 0 3px var(--omr-soft)}
+.progress{font-size:.85rem;color:var(--muted);font-variant-numeric:tabular-nums}
+
+.sheet{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:22px 22px 18px;display:flex;flex-direction:column;gap:14px}
+.qhead{display:flex;justify-content:space-between;gap:8px;align-items:center;flex-wrap:wrap}
+.qnum{font-family:var(--f-mono);font-weight:600;color:var(--omr);font-size:.95rem}
+.qtext{font-size:1.05rem;font-weight:500;min-width:0}
+.choices{display:flex;flex-direction:column;gap:8px;list-style:none;margin:0;padding:0}
+.choices.ox{flex-direction:row}
+.choices.ox li{flex:1}
+.choices.ox .choice{justify-content:center;font-size:1.3rem;font-weight:700;padding:14px}
+.choices.ox .choice .b{display:none}
+.choice{display:flex;gap:12px;align-items:flex-start;width:100%;text-align:left;font:inherit;color:var(--ink);background:transparent;border:1px solid var(--line);border-radius:8px;padding:10px 12px;cursor:pointer}
+.choice:hover:not(:disabled){border-color:var(--omr)}
+.choice .b{flex:none;width:22px;height:22px;border-radius:50%;border:1.5px solid var(--omr);color:var(--omr);font-family:var(--f-mono);font-size:.72rem;display:grid;place-items:center;margin-top:1px}
+.choice span:last-child{min-width:0}
+.choice:disabled{cursor:default}
+.choice.right{border-color:var(--ok);background:var(--ok-soft)}
+.choice.right .b{background:var(--ok);border-color:var(--ok);color:var(--card)}
+.choice.wrong{border-color:var(--bad);background:var(--bad-soft)}
+.short{display:flex;gap:8px;flex-wrap:wrap}
+.short input{flex:1 1 200px;min-width:0;font:inherit;padding:9px 12px;border:1px solid var(--line);border-radius:8px;background:var(--paper);color:var(--ink)}
+.essay{display:flex;flex-direction:column;gap:8px}
+.essay textarea{font:inherit;font-size:.95rem;min-height:120px;padding:10px 12px;border:1px solid var(--line);border-radius:8px;background:var(--paper);color:var(--ink);resize:vertical;width:100%}
+.btn{font:inherit;font-size:.9rem;padding:8px 16px;border-radius:8px;border:1px solid var(--ink);background:var(--ink);color:var(--paper);cursor:pointer}
+.btn.ghost{background:transparent;color:var(--ink);border-color:var(--line)}
+.btn.okb{background:var(--ok);border-color:var(--ok);color:var(--card)}
+.btn.badb{background:transparent;border-color:var(--bad);color:var(--bad)}
+.btn:disabled{opacity:.4;cursor:default}
+.feedback{border-radius:8px;padding:12px 14px;font-size:.92rem;display:flex;flex-direction:column;gap:6px}
+.feedback.ok{background:var(--ok-soft)} .feedback.bad{background:var(--bad-soft)} .feedback.model{background:var(--omr-soft)}
+.feedback strong{display:block}
+.feedback.ok strong{color:var(--ok)} .feedback.bad strong{color:var(--bad)} .feedback.model strong{color:var(--omr)}
+.feedback img{border-radius:6px;border:1px solid var(--line);background:#fff}
+.feedback ol,.feedback ul{margin:0;padding-left:20px}
+.kw{display:flex;flex-wrap:wrap;gap:6px}
+.kw label{display:flex;gap:5px;align-items:center;font-size:.82rem;border:1px solid var(--line);background:var(--card);border-radius:99px;padding:2px 10px 2px 6px;cursor:pointer}
+.nav{display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap}
+
+.result{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:22px;display:flex;flex-direction:column;gap:16px}
+.score{font-size:2.4rem;font-weight:700;font-variant-numeric:tabular-nums;line-height:1}
+.score small{font-size:1rem;color:var(--muted);font-weight:400}
+.bars{display:grid;grid-template-columns:auto 1fr auto;gap:6px 12px;align-items:center;font-size:.85rem;font-variant-numeric:tabular-nums}
+.bar{height:8px;background:var(--code-bg);border-radius:4px;overflow:hidden}
+.bar i{display:block;height:100%;background:var(--omr)}
+.wronglist{display:flex;flex-direction:column;gap:6px;font-size:.88rem;margin:0;padding-left:18px}
+.wronglist a{color:var(--ink)}
+.hint{color:var(--muted);font-size:.8rem}
+@media (prefers-reduced-motion:no-preference){.sheet{animation:in .18s ease-out}@keyframes in{from{transform:translateY(4px)}to{transform:none}}}
+</style>
+
+<div class="wrap">
+  <header>
+    <h1>데이터베이스응용 중간고사 퀴즈</h1>
+    <p>1~7장 강의 슬라이드 + 시험 공지 예시 문제 기반 · 10/22(목) 12:00 · 실제 시험은 주관식 20문항</p>
+    <div class="meta" id="meta"></div>
+  </header>
+
+  <section class="controls" aria-label="출제 설정">
+    <div class="row">
+      <span class="label">모드</span>
+      <div class="seg row" id="modeSeg">
+        <button type="button" data-mode="mock" aria-pressed="true">모의고사 20문항</button>
+        <button type="button" data-mode="all" aria-pressed="false">전체 문제</button>
+        <button type="button" data-mode="essay" aria-pressed="false">서술형·ERD만</button>
+        <button type="button" data-mode="wrong" aria-pressed="false">틀린 문제만</button>
+      </div>
+    </div>
+    <div class="row" id="chipRow"><span class="label">범위</span></div>
+    <div class="row" style="justify-content:space-between">
+      <span class="progress" id="progress"></span>
+      <button type="button" class="btn ghost" id="reshuffle">새로 출제</button>
+    </div>
+    <div class="omr" id="omr" aria-label="문항 번호"></div>
+  </section>
+
+  <main id="stage"></main>
+  <p class="hint">진행 상황은 이 브라우저에만 저장됩니다. 단답형은 띄어쓰기·대소문자·괄호를 무시하고 채점합니다. 서술형은 먼저 직접 써 보고(또는 종이에 그리고) 모범답안의 핵심어와 비교해 스스로 채점하세요.</p>
+</div>
+
+<script>
+// t: 범위(장/주제), h: 1이면 시험 공지 출제 포인트(형광펜)
+// type: mc(객관식, ans = 정답 인덱스) / ox(ans 0=O, 1=X) / sa(단답형, ans = 허용 답 목록) / es(서술형, a = 모범답안, kw = 채점 핵심어)
+const Q = [
+// ---------- 1장 DB 개요 ----------
+{id:"c1a",t:1,h:0,type:"mc",q:"파일 시스템의 문제점에 해당하지 <b>않는</b> 것은?",
+ c:["데이터 종속성","데이터 중복성","보안성 결여","데이터 독립성"],ans:3,
+ e:"데이터 독립성은 DB의 <b>장점</b>입니다. 파일 시스템 문제 6가지: 종속성, 무결성 침해, 중복성, 불일치, 표준화 어려움, 보안성 결여."},
+{id:"c1b",t:1,h:0,type:"mc",q:"DB와 DBMS에 대한 설명으로 옳은 것은?",
+ c:["DBMS는 데이터의 집합 자체를 말한다","응용프로그램은 반드시 DBMS를 통해 DB에 접근한다","응용프로그램마다 자기 데이터 파일을 직접 관리한다","DB를 쓰면 중복이 늘지만 속도가 빨라진다"],ans:1,
+ e:"DB = 데이터의 집합, DBMS = 이를 관리하는 S/W. 응용프로그램은 DBMS를 거쳐서만 접근합니다."},
+{id:"c1c",t:1,h:0,type:"es",q:"파일 시스템의 문제점 6가지를 쓰시오.",
+ a:"데이터 <b>종속성</b>, <b>무결성</b> 침해, <b>중복성</b>, <b>불일치</b>, <b>표준화</b> 어려움, <b>보안성</b> 결여",
+ kw:["종속성","무결성 침해","중복성","불일치","표준화 어려움","보안성 결여"]},
+// ---------- 2장 논리·물리 ----------
+{id:"c2a",t:2,h:1,type:"ox",q:"논리적 DB 설계는 Oracle, MySQL 등 사용할 DBMS 제품을 먼저 정하고 진행한다.",ans:1,
+ e:"논리적 설계는 <mark>DBMS 종류와 무관</mark>합니다. 특정 DBMS를 염두에 두는 것은 물리적 설계입니다."},
+{id:"c2b",t:2,h:1,type:"ox",q:"반정규화는 물리적 DB 설계에서 수행한다.",ans:0,
+ e:"물리적 설계 = 테이블·뷰·인덱스 설계, <mark>반정규화</mark> 수행."},
+{id:"c2c",t:2,h:1,type:"ox",q:"인덱스와 뷰 설계는 논리적 설계 단계의 작업이다.",ans:1,e:"인덱스·뷰는 물리적 설계 작업입니다."},
+{id:"c2d",t:2,h:0,type:"ox",q:"개체의 행위·사건(behavior/event)도 DB에 저장되도록 설계한다.",ans:1,
+ e:"DB에는 개체(entity)의 정보가, 행위·사건은 <b>프로그램</b>에 반영됩니다. 둘이 합쳐져야 현실세계가 온전히 모델링됩니다."},
+{id:"c2e",t:2,h:1,type:"ox",q:"엔티티, 속성, 주식별자는 물리적 모델링에서 쓰는 용어다.",ans:1,
+ e:"논리 용어: 엔티티·속성·주식별자·외래식별자·보조식별자 / 물리 용어: 테이블·컬럼·기본키·외래키·대체키."},
+{id:"c2f",t:2,h:0,type:"ox",q:"정규화는 논리적 DB 설계 과정에 포함된다.",ans:0,
+ e:"전체 흐름: 엔티티 정의 → 식별자/관계 → 상세화 → <b>정규화</b> → 도메인 → 통합·검증까지가 논리 설계입니다."},
+{id:"c2g",t:2,h:0,type:"ox",q:"M:N 관계는 그대로 두어도 되는 완성된 관계이다.",ans:1,e:"M:N은 미완성 관계라 교차(연관) 엔티티로 해소해야 합니다."},
+{id:"c2h",t:2,h:1,type:"mc",q:"논리적 용어와 물리적 용어의 대응으로 <b>틀린</b> 것은?",
+ c:["주식별자 – 기본키","외래식별자 – 외래키","보조식별자 – 대체키","엔티티 – 컬럼"],ans:3,
+ e:"엔티티 → 테이블, 속성 → 컬럼입니다."},
+{id:"c2i",t:2,h:0,type:"mc",q:"데이터 모델과 프로세스 모델을 연결해 검증하는 상관모델링의 대표 산출물은?",
+ c:["ERD","DFD","CRUD 매트릭스","엔티티 기술서"],ans:2,
+ e:"구축 절차: ISP → 업무분석 → 데이터/프로세스 모델링 → <b>상관모델링(CRUD 매트릭스)</b> → 물리 설계 → 구축."},
+{id:"c2j",t:2,h:1,type:"es",q:"논리적 DB 설계와 물리적 DB 설계를 <b>정의 · DBMS 종속 여부 · 사용 용어</b> 세 가지 기준으로 비교하시오.",
+ a:"<ul><li>정의: 논리 = 현실세계를 분석해 개념적 모델(<b>ERD</b>)을 만드는 <b>데이터 모델링</b> / 물리 = 논리 설계를 바탕으로 <b>테이블·뷰·인덱스 설계, 반정규화</b></li><li>DBMS: 논리 = <mark>DBMS 종류와 무관</mark> / 물리 = <mark>특정 DBMS를 염두</mark></li><li>용어: 논리 = 엔티티·속성·주식별자·외래식별자·보조식별자 / 물리 = 테이블·컬럼·기본키·외래키·대체키</li></ul>",
+ kw:["ERD·데이터 모델링","인덱스·반정규화","DBMS 무관 / 특정 DBMS","엔티티↔테이블 용어"]},
+// ---------- 3장 모델링 개념 ----------
+{id:"c3a",t:3,h:1,type:"mc",q:"엔티티가 되기 위한 조건이 <b>아닌</b> 것은?",
+ c:["업무에 필요하고 관리할 정보이다","인스턴스가 2개 이상이다","속성이 1개 이상이다","다른 엔티티와 반드시 1:1 관계를 가진다"],ans:3,
+ e:"<mark>① 업무상 관리 필요 ② 인스턴스 2개 이상 ③ 속성 1개 이상</mark>. 속성이 안 보이면 다른 엔티티의 속성일 가능성이 큽니다."},
+{id:"c3b",t:3,h:0,type:"mc",q:"주문서, 거래명세서는 엔티티 분류상 무엇인가?",
+ c:["유형 엔티티","무형 엔티티","문서 엔티티","코드 엔티티"],ans:2,
+ e:"5분류: 유형(고객, 사원) / 무형(생산계획, 부서조직) / <b>문서</b>(주문서) / 이력(입고이력) / 코드(국가코드)."},
+{id:"c3c",t:3,h:0,type:"mc",q:"'금액 = 수량 × 단가'에서 금액은 어떤 속성인가?",
+ c:["기본속성","설계속성","유도속성","식별속성"],ans:2,
+ e:"기본속성 = 현실에서 얻음 / 설계속성 = 코드·일련번호 / <b>유도속성</b> = 다른 속성에서 계산."},
+{id:"c3d",t:3,h:0,type:"sa",q:"코드, 일련번호처럼 현실에는 없지만 설계하면서 만들어 넣는 속성을 무엇이라 하는가?",
+ ans:["설계속성","설계"],e:"속성 3분류: 기본 / 설계 / 유도."},
+{id:"c3e",t:3,h:1,type:"mc",q:"카디널리티와 참여도에 대한 설명으로 옳은 것은?",
+ c:["카디널리티 = 최소 참여수, 참여도 = 최대 참여수","카디널리티 = 최대 참여수, 참여도 = 최소 참여수","둘 다 최대 참여수를 뜻한다","참여도는 관계의 이름이다"],ans:1,
+ e:"<mark>카디널리티 = 최대</mark>(단일 |, 다중 &lt;), <mark>참여도 = 최소</mark>(필수 |, 선택 O)."},
+{id:"c3f",t:3,h:1,type:"mc",q:"두 엔티티 중 부모 엔티티를 정하는 기준은?",
+ c:["속성이 더 많은 쪽","정보가 먼저 생성되는 쪽","인스턴스가 더 많은 쪽","이름이 알파벳 순으로 앞서는 쪽"],ans:1,
+ e:"<mark>먼저 생성되는 쪽 = 부모</mark>, 가져다 쓰는 쪽 = 자식. 일반적으로 1:N, 부모의 주식별자가 자식의 외래식별자가 됩니다."},
+{id:"c3g",t:3,h:0,type:"ox",q:"1:1 관계인 두 엔티티는 하나로 합칠 수 있다.",ans:0,e:"대부분 1:N이고, 1:1은 합칠 수 있으며, M:N은 해소가 필요합니다."},
+{id:"c3h",t:3,h:0,type:"mc",q:"엔티티 명명 규칙에 맞지 <b>않는</b> 것은?",
+ c:["현업에서 쓰는 용어를 쓴다","단수 명사로 쓴다","짧게 쓰기 위해 약어를 적극적으로 쓴다","모델 안에서 유일한 이름을 쓴다"],ans:2,e:"약어는 지양합니다."},
+{id:"c3i",t:3,h:0,type:"mc",q:"'두 엔티티 사이에 관계가 있다'는 말이 뜻하는 것은?",
+ c:["두 엔티티의 이름이 같다","두 엔티티가 공유하는 속성이 있다","두 엔티티의 인스턴스 수가 같다","두 엔티티가 같은 테이블에 저장된다"],ans:1,
+ e:"관계 = 공유하는 속성이 있다는 뜻입니다(속성 이름은 달라도 됨). 7장 Rule 1과 같은 내용입니다."},
+// ---------- 4장 ERwin ----------
+{id:"c4a",t:4,h:1,type:"mc",q:"ERwin에서 ERD를 보는 4가지 레벨이 <b>아닌</b> 것은?",
+ c:["엔티티(Entity) 레벨","속성(Attribute) 레벨","주식별자(Primary Key) 레벨","관계(Relationship) 레벨"],ans:3,
+ e:"<mark>엔티티 / 주식별자 / 식별자(Keys) / 속성</mark> 레벨."},
+{id:"c4b",t:4,h:1,type:"mc",q:"ERwin의 '주식별자(Primary Key) 레벨'에서 보이는 것은?",
+ c:["엔티티 이름과 관계선만","엔티티명과 주식별자만","주식별자와 외래식별자 등 키 속성만","모든 속성"],ans:1,
+ e:"엔티티 레벨 = 이름만 / 주식별자 레벨 = PK만 / 식별자(Keys) 레벨 = PK+FK 등 키 / 속성 레벨 = 전부."},
+{id:"c4c",t:4,h:1,type:"mc",q:"식별 관계(Identifying)에 대한 설명으로 옳은 것은?",
+ c:["FK가 자식의 일반 속성이 되고 점선으로 그린다","FK가 자식 PK의 일부가 되고 실선으로 그린다","FK가 추가되지 않고 정보만 표시한다","부모 쪽에 FK가 추가된다"],ans:1,
+ e:"<mark>식별 = FK가 PK 일부 = 실선</mark>, 비식별 = FK가 일반 속성 = 점선, M:N = FK 추가 안 됨."},
+{id:"c4d",t:4,h:1,type:"sa",q:"ERwin에서 비식별 관계(Non-Identifying)는 어떤 선으로 표시되는가?",
+ ans:["점선","점선으로"],e:"식별 = 실선, 비식별 = <mark>점선</mark>."},
+{id:"c4e",t:4,h:0,type:"mc",q:"ERwin에서 관계를 맺을 때 올바른 클릭 순서는?",
+ c:["자식 → 부모","부모 → 자식","순서 무관","관계선을 먼저 그리고 엔티티를 고른다"],ans:1,
+ e:"부모 먼저 → 자식. 부모의 PK가 자식에 FK로 자동 추가됩니다."},
+{id:"c4f",t:4,h:0,type:"mc",q:"ERwin에서 업무규칙(Parent/Child × Insert/Update/Delete Rule)을 지정하는 탭은?",
+ c:["General","RI Actions","Definition","Datatype"],ans:1,e:"관계선 → <b>RI Actions</b> 탭."},
+{id:"c4g",t:4,h:0,type:"mc",q:"ERwin 관계 카디널리티 기호 P와 Z의 의미는?",
+ c:["P = zero or more, Z = exactly one","P = one or more, Z = zero or one","P = primary, Z = zero","P = parent, Z = child"],ans:1,
+ e:"기본 zero, one, or more / P = one or more / Z = zero or one."},
+{id:"c4h",t:4,h:0,type:"mc",q:"ERwin 같은 데이터 설계 도구의 기능이 <b>아닌</b> 것은?",
+ c:["논리 모델링","물리 모델링 및 DB 자동 구축","역공학(Reverse Engineering)","응용프로그램 소스코드 컴파일"],ans:3,e:"데이터 설계 도구: 논리·물리 모델링, DB 자동 구축, 역공학."},
+{id:"c4i",t:4,h:1,type:"es",q:"ERwin의 ERD 4가지 레벨을 쓰고 각 레벨에서 보이는 내용을 설명하시오.",
+ a:"<ol><li><b>엔티티 레벨</b>: 엔티티 이름과 관계선만 (전체 구조 파악)</li><li><b>주식별자 레벨</b>: 엔티티명 + 주식별자만</li><li><b>식별자(Keys) 레벨</b>: 주식별자 + 외래식별자 등 키 속성만</li><li><b>속성 레벨</b>: PK·FK·일반 속성 전부 (가장 상세)</li></ol>",
+ kw:["엔티티","주식별자","식별자(Keys)","속성","각 레벨 보이는 것"]},
+// ---------- 5장 업무분석 ----------
+{id:"c5a",t:5,h:0,type:"sa",q:"분석 단계의 작은 오류가 이후 단계로 갈수록 누적되어 커지는 현상을 무엇이라 하는가?",
+ ans:["눈덩이효과","눈덩이 효과","스노우볼효과"],e:"눈덩이 효과. 그래서 업무분석이 중요합니다."},
+{id:"c5b",t:5,h:1,type:"mc",q:"인터뷰 대상 선정으로 옳은 것은?",
+ c:["데이터·업무 → 중간관리자, 의사결정 → 일선 담당자","데이터·업무 → 일선 담당자, 의사결정·경영 → 중간관리자","모두 최고경영자","모두 일선 담당자"],ans:1,
+ e:"<mark>데이터·업무 → 일선 담당자, 의사결정·경영 → 중간관리자</mark>."},
+{id:"c5c",t:5,h:1,type:"mc",q:"\"재고관리가 안 되는 이유는 위치 추적, 공간 부족, 수작업 중 무엇입니까?\"는 어떤 질문 유형인가?",
+ c:["열린 질문","닫힌 질문","추가 질문","유도 질문"],ans:1,e:"정해진 보기 중에서 고르게 하면 <mark>닫힌 질문</mark>."},
+{id:"c5d",t:5,h:1,type:"mc",q:"\"방금 말씀하신 부분에 대해 예를 하나 들어 주시겠습니까?\"는 어떤 질문 유형인가?",
+ c:["열린 질문","닫힌 질문","추가 질문","확인 질문"],ans:2,e:"답변에 대한 보충 질문 = <mark>추가 질문</mark>. 이해하고 있음을 상대에게 전달하는 효과도 있습니다."},
+{id:"c5e",t:5,h:1,type:"mc",q:"열린 질문의 단점으로 옳은 것은?",
+ c:["원하는 정보를 얻기까지 너무 빠르다","대화가 의도와 다른 방향으로 흐를 수 있다","대상자가 보기 중에서만 고를 수 있다","대상자의 이해 여부를 확인할 수 없다"],ans:1,e:"자유롭게 답하게 하므로 다른 방향으로 흐를 위험이 있습니다."},
+{id:"c5f",t:5,h:0,type:"mc",q:"인터뷰 계획·진행으로 적절하지 <b>않은</b> 것은?",
+ c:["질문을 사전에 알리고 문서화한다","업무 용어를 미리 숙지한다","충분히 듣기 위해 3시간 이상 길게 진행한다","분석자가 주도적으로 진행해 잡담·하소연을 막는다"],ans:2,e:"<b>1시간 이내</b>, 업무에 지장 없는 여유 시간대에 진행합니다."},
+{id:"c5g",t:5,h:0,type:"mc",q:"인터뷰가 필요한 이유로 거리가 <b>먼</b> 것은?",
+ c:["문서만으로는 정보가 불충분하다","불명확한 점을 해소할 수 있다","현재 문제점은 실무자가 가장 잘 안다","인터뷰를 하면 문서 수집이 필요 없어진다"],ans:3,
+ e:"필요성: 문서만으로 불충분, 불명확한 점 해소, 중요/비중요 정보 분리, 현재 문제점은 실무자가 가장 잘 앎."},
+{id:"c5h",t:5,h:1,type:"mc",q:"DFD에서 위아래 두 줄(═══)로 표시하는 기호는?",
+ c:["프로세스","데이터 흐름","데이터 저장소","종단점"],ans:2,
+ e:"<mark>데이터 저장소</mark> = 머물러 있는 자료 집합 → 엔티티 후보. 프로세스 = 원, 데이터 흐름 = 화살표, 종단점 = 사각형."},
+{id:"c5i",t:5,h:1,type:"mc",q:"DFD의 종단점(terminator) 이름을 붙이는 방법으로 옳은 것은?",
+ c:["담당자 개인 이름으로","역할 이름으로","번호 + 동사형으로","저장되는 데이터 이름으로"],ans:1,
+ e:"종단점은 <b>역할</b>로(고객, 택배사). 프로세스는 <b>번호 + 동사형</b>(1.주문접수)."},
+{id:"c5j",t:5,h:1,type:"mc",q:"DFD 기호 중 엔티티 후보로 바로 이어지는 것은?",
+ c:["프로세스","데이터 흐름","데이터 저장소","종단점"],ans:2,e:"데이터 저장소는 그대로 엔티티 후보가 됩니다(6장 도출 소스에도 DFD의 Data Store가 있음)."},
+{id:"c5k",t:5,h:0,type:"mc",q:"일반적인 DFD 규칙상 <b>잘못된</b> 데이터 흐름은? <span class=\"pill\">슬라이드 외 보충</span>",
+ c:["종단점 → 프로세스","프로세스 → 데이터 저장소","종단점 → 데이터 저장소 (직접)","데이터 저장소 → 프로세스"],ans:2,
+ e:"데이터 흐름은 반드시 프로세스를 거칩니다. 종단점→저장소, 저장소→저장소, 종단점→종단점 직접 연결은 X."},
+{id:"c5l",t:5,h:1,type:"es",q:"다음을 DFD로 그리시오. (종이에 그린 뒤 모범답안 확인)<br>\"고객이 주문을 요청하면 제품 재고를 확인하여 주문을 접수하고, 주문 내역을 저장한 뒤 고객에게 주문 확인을 보낸다. 접수된 주문은 배송 처리되어 택배사로 전달된다.\"",
+ a:"<img src=\"dfd_order.png\" alt=\"주문 처리 DFD 모범답안\"><ul><li>종단점(사각형): 고객, 택배사 — 역할 이름</li><li>프로세스(원): 1.주문접수, 2.배송처리 — 번호 + 동사형</li><li>저장소(두 줄): 주문, 제품 — 엔티티 후보</li><li>모든 화살표에 데이터 이름(주문요청, 주문확인, 재고정보, 주문내역, 배송요청, 배송정보)</li></ul>",
+ kw:["4기호 정확","프로세스 번호+동사","저장소 2개","화살표마다 데이터 이름","종단점 = 역할"]},
+{id:"c5m",t:5,h:1,type:"es",q:"도서관 대출 담당자를 인터뷰하려 한다. <b>열린 · 닫힌 · 추가 질문</b>을 하나씩 만들고 각 유형의 특징을 쓰시오.",
+ a:"<ul><li><b>열린</b>: \"현재 대출 업무에서 가장 불편한 점은 무엇입니까?\" — 자유롭게 답하게 함, 의도와 다른 방향으로 흐를 위험</li><li><b>닫힌</b>: \"연체가 생기는 주된 이유는 ①반납일 미인지 ②분실 ③장기 출장 중 무엇입니까?\" — 보기 중 선택, 원하는 정보를 빠르게</li><li><b>추가</b>: \"방금 '예약 도서가 꼬인다'고 하셨는데 예를 들어 주시겠습니까?\" — 보충 질문, 이해하고 있음을 전달</li></ul>주의점: 목표 명확화, 용어 숙지, 대상 선정(일선 담당자/중간관리자), 질문 사전 공지, 1시간 이내, 주도적 진행.",
+ kw:["열린 + 단점","닫힌 + 보기","추가 + 보충","주의점 1개 이상"]},
+// ---------- 6장 엔티티 정의 ----------
+{id:"c6a",t:6,h:0,type:"mc",q:"엔티티를 도출할 때 업무 문서에서 먼저 표시하는 것은?",
+ c:["동사","명사","형용사","숫자"],ans:1,e:"엔티티 도출 = <b>명사</b> 표시, 관계 정의 = <b>동사</b> 찾기."},
+{id:"c6b",t:6,h:0,type:"mc",q:"명사를 분류할 때 엔티티인지 속성인지 <b>불분명한</b> 명사는 어디에 두는가?",
+ c:["바로 제외한다","엔티티 후보 풀에 두고 나중에 재검토한다","무조건 엔티티로 만든다","엔티티 기술서의 비고에 쓴다"],ans:1,e:"불분명 → 후보 풀. 5단계에서 다시 검토해 리스트로 옮기거나 제외합니다."},
+{id:"c6c",t:6,h:1,type:"mc",q:"도서관 업무 명사 중 '홍길동'은 어떻게 분류하는가?",
+ c:["엔티티","속성","인스턴스","제외"],ans:2,e:"회원 엔티티의 한 행 = <b>인스턴스</b>."},
+{id:"c6d",t:6,h:1,type:"mc",q:"학원 업무 설명의 '○○학원'은 엔티티가 되지 못한다. 그 이유는?",
+ c:["속성이 없어서","인스턴스가 1개뿐이라서","이름이 고유명사라서","다른 엔티티와 관계가 없어서"],ans:1,e:"엔티티 조건 '인스턴스 2개 이상'을 만족하지 못합니다."},
+{id:"c6e",t:6,h:1,type:"mc",q:"'이용자'와 '회원'이 같은 대상을 가리킬 때 올바른 처리는?",
+ c:["둘 다 엔티티로 둔다","하나로 통합하고 다른 하나는 유사어로 기록한다","둘 다 제외한다","이용자를 회원의 속성으로 둔다"],ans:1,e:"중복·유사 명사 통합 → 엔티티 리스트의 유사어 칸에 기록."},
+{id:"c6f",t:6,h:0,type:"mc",q:"'회원카드', '월말결산'이 엔티티에서 제외되는 이유는?",
+ c:["인스턴스가 1개뿐","시스템에서 관리할 필요가 없어서","속성이 너무 많아서","유도속성이라서"],ans:1,e:"6단계: 시스템에서 관리할 필요가 있는지 검토."},
+{id:"c6g",t:6,h:1,type:"mc",q:"장부·전표에서 엔티티를 도출할 때, 다른 전표에도 반복해서 등장하는 항목(업체, 제품)은 어떻게 하는가?",
+ c:["전표마다 속성으로 그대로 둔다","별도 엔티티로 추출한다(공급처, 제품정보)","유도속성으로 처리한다","제외한다"],ans:1,e:"<mark>다른 전표에도 반복 등장하는 항목 → 별도 엔티티</mark>."},
+{id:"c6h",t:6,h:0,type:"mc",q:"'입고전표'에서 도출한 엔티티의 이름으로 가장 적절한 것은?",
+ c:["입고전표","입고내역(입고)","전표","입고전표목록"],ans:1,e:"장표명 대신 엔티티다운 이름을 붙입니다."},
+{id:"c6i",t:6,h:0,type:"mc",q:"엔티티 기술서의 항목이 <b>아닌</b> 것은?",
+ c:["엔티티명","설명","관련속성·유사어","인덱스 구성"],ans:3,e:"엔티티명 / 설명 / 관련속성 / 유사어 / 비고. 인덱스는 물리 설계 영역입니다."},
+{id:"c6j",t:6,h:1,type:"es",q:"판매전표를 엔티티로 만들 때 <b>헤더와 상세를 구분해야 하는 이유</b>를 서술하시오.",
+ a:"전표 한 장은 <mark>헤더 1건 : 상세 N건</mark>이다. 한 엔티티로 두면 ① <b>반복 그룹</b>이 생겨 품목이 몇 개 올지 몰라 컬럼 수를 정할 수 없고 ② 품목마다 판매일자·고객 등 헤더 정보가 <b>중복 저장</b>되어 수정 시 <b>불일치</b>가 생기며 ③ <b>삽입·삭제 이상</b>이 발생한다. 따라서 판매(헤더)와 판매상세(상세)를 분리해 <b>1:N 식별 관계</b>로 연결한다.",
+ kw:["헤더 1 : 상세 N","반복 그룹","헤더 정보 중복 → 불일치","삽입·삭제 이상","1:N 식별 관계"]},
+{id:"c6k",t:6,h:1,type:"es",q:"다음 업무 설명에서 엔티티를 도출하고, 엔티티가 아닌 명사는 이유와 함께 분류하시오.<br>\"○○학원은 강사와 강좌를 관리한다. 수강생은 학원 홈페이지에서 수강신청서를 작성해 여러 강좌를 신청하고, 한 강좌에는 여러 수강생이 신청한다. 각 강좌는 한 강사가 담당한다. 수강료는 나누어 납부할 수 있으며 납부일자와 납부금액을 기록한다. 우수 수강생 홍길동에게는 장학금을 준다.\"",
+ a:"<ul><li>엔티티: <mark>강사, 강좌, 수강생, 수강신청, 납부</mark></li><li>수강신청서 → '<b>수강신청</b>'으로 이름 변경, 수강생–강좌 M:N을 해소하는 교차 엔티티</li><li>납부: 한 신청에 여러 번 납부 → 별도 엔티티</li><li>수강료 → 강좌의 속성 / 납부일자·납부금액 → 납부의 속성</li><li>홍길동 → 수강생의 인스턴스</li><li>○○학원 → 제외(인스턴스 1개) / 학원 홈페이지 → 제외(관리할 데이터 아님)</li></ul>",
+ kw:["엔티티 5개","수강신청 = 교차 엔티티","속성 분류","홍길동 = 인스턴스","학원·홈페이지 제외 이유"]},
+// ---------- 7장 식별자·관계 ----------
+{id:"c7a",t:7,h:1,type:"mc",q:"주식별자 선정 시 반드시 지켜야 하는 조건은?",
+ c:["현재 데이터에서만 중복이 없으면 된다","현재뿐 아니라 미래에도 중복이 없어야 한다","가능한 한 많은 속성으로 구성한다","항상 숫자형 일련번호여야 한다"],ans:1,
+ e:"<mark>현재 + 미래 유일성</mark>, 그리고 최소성. 확인 방법 = 테이블을 그려 예시 데이터를 넣어 본다."},
+{id:"c7b",t:7,h:1,type:"mc",q:"주식별자의 최소성을 검토하는 방법은?",
+ c:["속성 수가 3개 이하인지 본다","PK 속성을 하나씩 빼 봐도 유일성이 유지되면 그 속성은 제거한다","속성 이름 길이가 가장 짧은 것을 고른다","모든 속성을 PK에 넣는다"],ans:1,
+ e:"<mark>하나씩 빼 봤을 때도 유일하면 불필요한 속성</mark>입니다."},
+{id:"c7c",t:7,h:1,type:"mc",q:"수강(학번, 과목번호, 학기, 학생이름, 성적)의 PK로 최소성을 만족하는 것은? (재수강 가능)",
+ c:["학번","학번 + 과목번호","학번 + 과목번호 + 학기","학번 + 과목번호 + 학기 + 학생이름"],ans:2,
+ e:"학생이름은 학번이 결정하므로 빼도 유일 → 제거. 학기를 빼면 재수강 시 (학번, 과목번호)가 중복 → 필요."},
+{id:"c7d",t:7,h:1,type:"mc",q:"일일판매실적의 주식별자로 적절한 것은?",
+ c:["판매일자","제품번호","판매일자 + 제품번호","판매일자 + 제품번호 + 판매수량"],ans:2,
+ e:"판매일자만이면 같은 날 다른 제품을 넣을 수 없음(유일성 부족). 판매수량까지 넣으면 최소성 위반."},
+{id:"c7e",t:7,h:1,type:"mc",q:"대출번호 같은 인위적 주식별자를 쓸 때의 문제점은?",
+ c:["NULL이 들어간다","같은 전표를 두 번 입력해도 번호만 달라 들어가는 내용상 중복","외래키를 만들 수 없다","정렬이 불가능하다"],ans:1,
+ e:"<mark>내용상 중복</mark>. 대출일+회원번호+도서관리번호로 잡았다면 막혔을 것입니다."},
+{id:"c7f",t:7,h:0,type:"mc",q:"관계를 정의할 때 업무 문서에서 찾는 것은?",
+ c:["명사","동사","숫자","형용사"],ans:1,e:"① 동사 찾기(고객에게 주문서를 '발송') ② 관계 매트릭스 ③ 부모·자식 찾기 ④ 카디널리티·참여도."},
+{id:"c7g",t:7,h:1,type:"mc",q:"관계 Rule 3으로 옳은 것은?",
+ c:["부모의 공통속성은 FK, 자식의 공통속성은 PK","부모의 공통속성은 PK, 자식의 공통속성은 FK","부모와 자식 모두 공통속성을 PK로 둔다","공통속성은 관계에 필요 없다"],ans:1,
+ e:"Rule ① 관계 = 공유 속성 ② 먼저 생성 = 부모 <mark>③ 부모 공통속성 = PK, 자식 = FK ④ 부모:자식 = 1:N</mark>."},
+{id:"c7h",t:7,h:1,type:"mc",q:"'A 정보를 만들려면 B 정보가 필요하다'면 부모는?",
+ c:["A","B","둘 다","알 수 없다"],ans:1,e:"필요로 하는 쪽(A)이 자식, 먼저 있어야 하는 쪽(B)이 부모."},
+{id:"c7i",t:7,h:1,type:"es",q:"주식별자의 <b>최소성</b>이 무엇인지, 그리고 어떻게 검토하는지 예를 들어 서술하시오.",
+ a:"주식별자는 유일성을 만족하는 <b>최소한의 속성</b>으로 구성해야 한다. 검토법: <mark>PK 속성을 하나씩 빼 보고도 유일성이 유지되면 그 속성은 불필요하므로 제거</mark>한다.<br>예) 수강(학번+과목번호+학기+학생이름) → 학생이름을 빼도 유일 → PK = 학번+과목번호+학기. 일일판매실적은 판매일자만으로는 유일하지 않으므로 판매일자+제품번호. 유일성은 현재뿐 아니라 미래까지 고려하고, 테이블을 그려 예시 데이터로 확인한다.",
+ kw:["최소한의 속성","하나씩 빼 보기","예시 1개","미래 유일성"]},
+// ---------- 참조무결성 ----------
+{id:"r1",t:8,h:1,type:"mc",q:"부서(101 영업부, 125, 146, 150) / 사원(김철수 101, 홍길동 101, 강만길 125, 이재천 146). 부서 101 삭제에 <b>Cascade</b>를 적용하면?",
+ c:["삭제가 거부된다","부서 101과 함께 김철수·홍길동도 삭제된다","김철수·홍길동의 부서가 NULL이 된다","김철수·홍길동의 부서가 기본값으로 바뀐다"],ans:1,e:"Cascade = 변경을 자식에 <mark>전파</mark>."},
+{id:"r2",t:8,h:1,type:"mc",q:"같은 데이터에서 부서 삭제 규칙이 <b>Restrict</b>일 때 삭제할 수 있는 부서는?",
+ c:["101","125","146","150"],ans:3,e:"자식(사원)이 참조 중인 101·125·146은 삭제 불가, 아무도 참조하지 않는 150만 가능."},
+{id:"r3",t:8,h:1,type:"sa",q:"부서 101 삭제 시 김철수·홍길동의 부서코드를 NULL로 바꾸는 규칙의 이름은?",
+ ans:["setnull","set null"],e:"Set Null = 참조를 <mark>끊음</mark>. FK가 NULL 허용이어야 쓸 수 있습니다."},
+{id:"r4",t:8,h:1,type:"mc",q:"Set Null 정책의 단점으로 옳은 것은?",
+ c:["자식 데이터가 모두 삭제된다","FK가 NOT NULL이면 사용할 수 없고, 소속 불명 데이터가 생긴다","부모를 삭제할 수 없다","부모의 PK가 자동 변경된다"],ans:1,e:"Cascade의 단점은 의도치 않은 대량 삭제, Restrict의 단점은 번거로움."},
+{id:"r5",t:8,h:1,type:"mc",q:"사원 테이블에 부서코드 777(부서에 없음)인 사원을 삽입한다. 자식 Insert 규칙이 Restrict이면?",
+ c:["부서 777이 자동 생성된다","삽입이 거부되고 에러가 난다","부서코드가 NULL로 들어간다","그대로 삽입된다"],ans:1,e:"<mark>부모에 없는 값이면 거부 + 에러</mark>. None이면 어떤 값이든 허용."},
+{id:"r6",t:8,h:1,type:"ox",q:"자식 튜플(사원)을 삭제하면 부모(부서)에도 영향이 있다.",ans:1,e:"<mark>자식 튜플 삭제는 부모에 아무 영향이 없습니다</mark>."},
+{id:"r7",t:8,h:0,type:"mc",q:"주문을 취소(삭제)할 때 주문상세에 가장 적합한 규칙은?",
+ c:["Restrict","Cascade","Set Null","None"],ans:1,e:"주문상세는 주문에 완전히 종속 → Cascade Delete."},
+{id:"r8",t:8,h:1,type:"mc",q:"부서코드를 101 → 111로 바꿀 때 사원의 부서코드도 함께 바꾸는 처리는?",
+ c:["Restrict Update","Cascade Update","Set Null Update","None"],ans:1,e:"Cascade Update. 근본적으로는 PK를 잘 바뀌지 않는 값으로 정합니다."},
+{id:"r9",t:8,h:1,type:"mc",q:"대출 기록이 있는 회원이 탈퇴하려 한다. 대출 이력을 보존해야 할 때 적절한 처리는?",
+ c:["Cascade Delete","Restrict 또는 탈퇴여부 플래그로 논리 삭제","Set Default","None"],ans:1,
+ e:"판단 질문: <mark>\"부모가 사라져도 자식 기록을 보존해야 하는가?\"</mark> → 보존 = Restrict/Set Null(또는 논리 삭제), 종속 = Cascade."},
+{id:"r10",t:8,h:1,type:"sa",q:"관계 있는 두 테이블에서 한쪽 데이터 변화로 생길 불일치를 막기 위한 조치를 정의한 것을 무엇이라 하는가?",
+ ans:["업무규칙","참조무결성","참조무결성규칙"],e:"<mark>업무규칙</mark>(참조무결성 규칙)."},
+{id:"r11",t:8,h:1,type:"es",q:"학과–학생 관계에서 학과를 삭제하려 한다. <b>Restrict, Cascade, Set Null</b>을 적용했을 때 결과를 비교하고 가장 적절한 규칙을 고르시오.",
+ a:"<ul><li><b>Restrict</b>: 소속 학생이 있으면 <b>삭제 거부</b> — 가장 안전, 대신 학생을 먼저 옮겨야 해 번거로움</li><li><b>Cascade</b>: 소속 학생도 <b>함께 삭제</b> — 일관성 자동 유지, <b>의도치 않은 대량 삭제</b> 위험</li><li><b>Set Null</b>: 학생의 학과코드를 <b>NULL</b>로 — 학생 데이터 보존, FK가 NOT NULL이면 불가, 소속 불명 학생 발생</li></ul>결론: 학생 정보는 보존해야 하므로 Cascade는 부적절. <mark>Restrict</mark>(학생을 옮긴 뒤 삭제)가 가장 적절, 미배정을 허용하는 업무면 Set Null도 가능. 자식 삽입·수정은 Restrict.",
+ kw:["Restrict = 거부","Cascade = 함께 삭제 + 위험","Set Null = NULL + NOT NULL 불가","결론과 근거"]},
+// ---------- 유도속성 ----------
+{id:"d1",t:9,h:1,type:"sa",q:"MP3 단가가 350 → 360으로 바뀌었는데 저장된 금액 3500을 고치지 않았다. 이 판매의 수량은 몇 개인가? (숫자)",
+ ans:["10","10개"],e:"3500 / 350 = 10개. 이제 수량×단가 = 3600 ≠ 금액 3500 → <mark>불일치</mark>."},
+{id:"d2",t:9,h:1,type:"mc",q:"유도속성을 저장할 때 불일치가 생기는 근본 원인은?",
+ c:["유도속성은 NULL을 허용하지 않아서","같은 정보가 두 곳에 저장(중복)되어 원본 변경 시 함께 갱신하지 않으면 어긋나서","유도속성은 PK가 될 수 없어서","유도속성은 문자형이라서"],ans:1,e:"원본이 바뀔 때 유도속성을 함께 갱신하지 않으면 불일치."},
+{id:"d3",t:9,h:1,type:"mc",q:"유도속성을 <b>저장하지 않는</b> 편이 유리한 경우는?",
+ c:["계산 비용이 크고 조회가 매우 잦다","원본 데이터가 거의 변경되지 않는다","당시 값을 이력으로 보존해야 한다","계산이 간단하고 원본이 자주 변경된다"],ans:3,
+ e:"저장 유리: <mark>조회 잦음·계산 비쌈 / 원본 거의 불변 / 이력 보존</mark>. 저장한다면 트리거·프로그램으로 동기화."},
+{id:"d4",t:9,h:0,type:"mc",q:"판매상세의 '판매단가'를 유도속성으로 보지 않고 저장하는 이유는?",
+ c:["제품 단가와 항상 같아서","판매 당시의 단가라 이후 제품 단가가 바뀌어도 보존해야 하는 이력이라서","PK의 일부라서","계산이 불가능해서"],ans:1,e:"이력 보존. 반면 금액(수량×단가)은 계산 가능한 유도속성."},
+{id:"d5",t:9,h:1,type:"es",q:"유도속성을 저장할 때 생기는 데이터 불일치 문제를 예를 들어 설명하고, 저장 여부 판단 기준을 쓰시오.",
+ a:"유도속성은 다른 속성으로 계산되는 속성(금액 = 수량 × 단가)이다. 저장하면 같은 정보가 두 곳에 있는 <b>중복</b>이 되어, <mark>단가가 350 → 360으로 바뀌었는데 금액 3500을 함께 갱신하지 않으면 수량×단가(3600) ≠ 금액(3500)인 불일치</mark>가 생긴다.<br>판단 기준: ① 계산 비용이 크고 <b>조회가 잦으면</b> 저장 ② 원본이 <b>거의 변경되지 않으면</b> 저장 ③ 당시 값을 <b>이력으로 보존</b>해야 하면 저장 / 계산이 간단하거나 원본이 자주 바뀌면 저장하지 않는다. 저장한다면 트리거·프로그램으로 <b>동기화 방안</b>을 마련한다.",
+ kw:["정의 + 예시","중복 → 갱신 누락","조회 빈도","원본 변경 빈도","이력 보존","동기화 방안"]},
+// ---------- FK·참여수 ----------
+{id:"f1",t:10,h:1,type:"mc",q:"1:N 관계에서 외래키(FK)는 어디에 두는가?",
+ c:["1쪽(부모)","N쪽(자식)","양쪽 모두","관계 엔티티를 따로 만들어야 한다"],ans:1,e:"<mark>FK는 항상 N쪽(자식)</mark>. 1쪽 부모의 PK가 N쪽으로 내려갑니다."},
+{id:"f2",t:10,h:1,type:"mc",q:"FK의 NULL 허용 여부를 정하는 기준은?",
+ c:["부모의 인스턴스 수","자식이 부모 관계에 필수로 참여하는지(최소 참여수가 1인지)","FK의 데이터 타입","부모 테이블의 크기"],ans:1,
+ e:"<mark>자식→부모 최소 참여수 1 = NOT NULL, 0 = NULL 허용</mark>. 식별 관계면 무조건 NOT NULL."},
+{id:"f3",t:10,h:1,type:"ox",q:"식별 관계에서 자식에게 넘어온 FK는 NULL을 허용할 수 있다.",ans:1,e:"식별 관계의 FK는 PK의 일부이므로 <mark>무조건 NOT NULL</mark>."},
+{id:"f4",t:10,h:1,type:"mc",q:"\"모든 사원은 반드시 하나의 부서에 소속된다.\" 부서 쪽 관계선 끝에 그릴 기호는?",
+ c:["O&lt;","||","|&lt;","O|"],ans:1,e:"사원 1명당 부서 (1, 1) → 부서 쪽 끝 <code>||</code>. <mark>기호는 세어지는 쪽 끝에, 안쪽 = 최소, 바깥쪽 = 최대</mark>."},
+{id:"f5",t:10,h:1,type:"mc",q:"\"고객은 주문을 안 할 수도, 여러 번 할 수도 있다.\" 주문 쪽 끝 기호는?",
+ c:["||","O&lt;","|&lt;","O|"],ans:1,e:"고객 1명당 주문 (0, N) → 주문 쪽 끝 <code>O&lt;</code>."},
+{id:"f6",t:10,h:1,type:"mc",q:"\"사원은 주차카드를 최대 1장 받을 수 있다(안 받아도 됨).\" 주차카드 쪽 끝 기호는?",
+ c:["||","O&lt;","O|","|&lt;"],ans:2,e:"사원 1명당 카드 (0, 1) → <code>O|</code>. FK는 나중에 생기고 선택 참여하는 주차카드 쪽에 둡니다."},
+{id:"f7",t:10,h:1,type:"sa",q:"\"부서는 사원이 없을 수도, 여러 명일 수도 있다.\" 부서 1개당 사원의 (최소, 최대)는? 예: (1,1)",
+ ans:["(0,n)","0,n","(0,N)","(0,다)"],e:"(0, N) → 사원 쪽 끝 <code>O&lt;</code>."},
+{id:"f8",t:10,h:1,type:"mc",q:"M:N 관계에서 외래키는 어떻게 처리하는가?",
+ c:["한쪽에 아무렇게나 둔다","양쪽에 서로의 PK를 둔다","교차(연관) 엔티티를 만들어 양쪽 PK를 모두 FK로 받는다","FK 없이 관계선만 그린다"],ans:2,e:"교차 엔티티 예: 수강신청, 주문상세, 대출."},
+{id:"f9",t:10,h:0,type:"mc",q:"1:1 관계에서 FK를 두는 쪽은?",
+ c:["먼저 생성되는 쪽","나중에 생성되거나 선택적으로 참여하는 쪽","속성이 많은 쪽","항상 왼쪽 엔티티"],ans:1,e:"예: 사원–주차카드 → 주차카드.사원번호."},
+{id:"f10",t:10,h:1,type:"mc",q:"Set Null 규칙을 쓰려면 FK는?",
+ c:["NOT NULL이어야 한다","NULL 허용이어야 한다","PK의 일부여야 한다","상관없다"],ans:1,e:"NULL로 바꿔야 하므로 NULL 허용이어야 합니다."},
+{id:"f11",t:10,h:1,type:"es",q:"다음 관계에서 FK의 위치와 NULL 허용 여부를 근거와 함께 쓰시오.<br>(a) 고객–주문: 주문은 반드시 한 고객이 한다<br>(b) 사원–부서: 사원은 부서 미배정 상태일 수 있다<br>(c) 주문–주문상세–제품 (주문상세 PK = 주문번호+제품번호)",
+ a:"<ul><li>(a) <b>주문.고객번호</b>, <b>NOT NULL</b> — 1:N이라 N쪽, 주문은 고객에 필수 참여</li><li>(b) <b>사원.부서코드</b>, <b>NULL 허용</b> — 사원이 부서 없이 존재 가능(선택 참여)</li><li>(c) <b>주문상세.주문번호, 주문상세.제품번호</b>, <b>NOT NULL</b> — 식별 관계라 FK가 PK의 일부</li></ul><mark>한 줄 기준: 자식→부모 최소 참여수 1이면 NOT NULL, 0이면 NULL. 식별 관계면 무조건 NOT NULL.</mark>",
+ kw:["FK = N쪽","(a) NOT NULL","(b) NULL 허용","(c) 식별 → NOT NULL","판단 기준 한 줄"]},
+// ---------- ERD 설계·오류 ----------
+{id:"e1",t:11,h:1,type:"es",q:"학원 업무(강사, 강좌, 수강생, 수강신청, 납부)의 ERD를 그리시오. PK·FK, 관계선 양 끝 최소·최대 기호, 식별/비식별을 모두 표시할 것. (종이에 그린 뒤 확인)",
+ a:"<img src=\"erd_academy.png\" alt=\"학원 업무 ERD 모범답안\"><ul><li>수강생–강좌 M:N → <b>수강신청</b>(◆수강생번호 FK, ◆강좌번호 FK)으로 해소, 식별 관계(실선)</li><li>강좌.강사번호(FK) NOT NULL, 비식별(점선)</li><li>납부의 FK = 수강신청의 복합 PK 전체(수강생번호+강좌번호), 신청 1 : 납부 0..N(분할 납부)</li><li>총납부액·미납액 같은 유도속성은 저장하지 않음</li></ul>",
+ kw:["엔티티 5개","모든 PK","FK N쪽 + NULL 판단","양 끝 기호","식별/비식별","M:N 해소"]},
+{id:"e2",t:11,h:1,type:"es",q:"판매전표(판매번호, 판매일자, 고객, [제품번호·제품명·수량·단가]×N)와 입고전표(입고번호, 입고일자, 공급업체, [제품코드·품명·입고수량·입고단가]×N)로 각각 ERD를 그린 뒤 하나로 통합하시오.",
+ a:"<img src=\"erd_merged.png\" alt=\"판매·입고 통합 ERD 모범답안\"><ul><li><mark>제품번호 = 제품코드, 제품명 = 품명은 같은 의미(유사어) → 제품 엔티티 하나로 통합</mark></li><li>각 전표를 헤더/상세로 분리(판매–판매상세, 입고–입고상세), 상세는 식별 관계</li><li>반복 등장 항목 분리: 고객, 공급처, 제품 / 장표명 대신 엔티티다운 이름(입고전표 → 입고)</li></ul>",
+ kw:["헤더/상세 분리","제품 통합 + 근거","고객·공급처 분리","양 끝 기호","식별 관계"]},
+{id:"e3",t:11,h:1,type:"mc",q:"판매·입고 통합 ERD에서 '통합'의 핵심은?",
+ c:["판매와 입고를 한 엔티티로 합친다","같은 의미인 제품번호/제품코드, 제품명/품명을 제품 엔티티 하나로 합친다","고객과 공급처를 합친다","판매상세와 입고상세를 합친다"],ans:1,e:"유사어 통합 → 판매상세·입고상세가 모두 제품을 참조."},
+{id:"e4",t:11,h:1,type:"mc",q:"<code>[부서] ◆부서코드 부서명 사원번호(FK)</code> ||──O&lt; <code>[사원] ◆사원번호 사원명</code> 의 오류는?",
+ c:["부서명이 PK가 아니다","FK가 1쪽(부모)인 부서에 들어가 있다","관계선 기호가 반대다","사원에 PK가 없다"],ans:1,
+ e:"부서 하나에 사원 여러 명을 담을 수 없습니다. 부서.사원번호 삭제 → <b>사원.부서코드(FK)</b> 추가."},
+{id:"e5",t:11,h:1,type:"mc",q:"업무규칙 \"모든 사원은 반드시 부서에 소속\"인데 사원.부서코드가 NULL 허용이다. 수정 방법은?",
+ c:["부서코드를 PK로 바꾼다","부서코드를 NOT NULL로 바꾸고 부서 쪽 끝을 ||로 한다","관계를 삭제한다","Set Null 규칙을 쓴다"],ans:1,e:"참여도(필수)와 NULL 여부가 맞아야 합니다."},
+{id:"e6",t:11,h:1,type:"mc",q:"학생 >O──O&lt; 과목 처럼 M:N 관계가 남아 있는 ERD의 수정 방법은?",
+ c:["학생에 과목번호 FK를 추가한다","과목에 학번 FK를 추가한다","교차 엔티티 수강(◆학번 FK, ◆과목번호 FK, 학기, 성적)을 추가한다","관계를 1:1로 바꾼다"],ans:2,e:"M:N 미해소는 대표적인 오류 체크 포인트입니다."},
+{id:"e7",t:11,h:0,type:"mc",q:"ERwin(IDEF1X)에서 모서리가 둥근 사각형으로 그리는 엔티티는? <span class=\"pill\">슬라이드 외 보충</span>",
+ c:["독립 엔티티","종속 엔티티(식별 관계로 부모 PK를 자기 PK 일부로 받음)","코드 엔티티","M:N 엔티티"],ans:1,e:"독립 엔티티(자기 속성만으로 식별) = 각진 사각형. 예: 판매상세·수강신청은 종속."},
+{id:"e8",t:11,h:1,type:"es",q:"<code>주문(주문번호, 주문일, 고객번호, 고객명, 고객주소, 제품번호1, 제품명1, 수량1, 제품번호2, 제품명2, 수량2)</code>의 문제점을 쓰고 재설계하시오.",
+ a:"문제점: <mark>반복 그룹(제품1·2…) → 제품이 3개면 구조 변경 / 고객명·주소가 주문마다 중복 → 불일치 / 제품명 중복 / 헤더와 상세가 섞임</mark><br>재설계:<ul><li>고객(◆고객번호, 고객명, 고객주소)</li><li>제품(◆제품번호, 제품명, 단가)</li><li>주문(◆주문번호, 주문일, 고객번호(FK)) — 헤더</li><li>주문상세(◆주문번호(FK), ◆제품번호(FK), 수량) — 상세, 식별 관계</li></ul>고객 1:N 주문, 주문 1:N 주문상세, 제품 1:N 주문상세.",
+ kw:["반복 그룹","고객 정보 중복","헤더/상세 분리","엔티티 4개 + PK","FK 위치"]},
+{id:"e9",t:11,h:1,type:"es",q:"개발자가 화면을 먼저 설계하고 화면 항목을 그대로 테이블로 만들었다. <b>문제점 3가지</b>와 <b>개선 절차</b>를 서술하시오.",
+ a:"문제점<ol><li><mark>데이터 중복과 불일치</mark>: 여러 화면의 같은 항목(고객명·주소)이 테이블마다 중복 저장 → 한 곳만 수정하면 불일치</li><li><mark>엔티티·식별자·관계 미정의</mark>: 화면 단위 테이블이라 헤더/상세가 섞여 반복 그룹, PK·FK·참조무결성 없음 → 무결성 깨짐</li><li><mark>화면에 종속된 구조</mark>: 합계·금액 같은 유도속성·화면 전용 항목까지 저장 → 불일치, 화면이 바뀌면 DB도 바뀌어야 함(유지보수성·확장성 저하)</li></ol>개선 절차: <mark>업무분석(문서 수집·인터뷰·DFD) → 엔티티 도출(헤더/상세 분리) → 주식별자(유일성·최소성) → 관계·외래식별자(참여수, FK 위치·NULL) → 업무규칙 → 속성 상세화(유도속성) → 물리 설계</mark>. 화면이 아니라 <b>업무와 데이터</b>를 기준으로 설계한다.",
+ kw:["중복·불일치","엔티티/식별자/관계 없음","화면 종속·유도속성","업무분석부터 순서대로","업무와 데이터 기준"]},
+{id:"e10",t:11,h:1,type:"mc",q:"학원 ERD에서 납부 엔티티가 수강신청을 참조할 때 납부에 들어가는 FK는?",
+ c:["수강생번호만","강좌번호만","수강신청의 복합 PK 전체(수강생번호 + 강좌번호)","납부번호"],ans:2,e:"부모 PK가 복합이면 FK도 복합 PK 전체를 받습니다."},
+{id:"e11",t:11,h:1,type:"mc",q:"10점짜리 ERD 답안의 채점 포인트로 거리가 <b>먼</b> 것은?",
+ c:["모든 엔티티에 PK 표시","FK를 N쪽에 (FK)로 표시하고 NULL 여부 판단","관계선 양 끝 최소·최대 기호","테이블별 인덱스와 저장 공간 계산"],ans:3,e:"인덱스·저장 공간은 물리 설계입니다. 나머지 + 식별/비식별, 관계명, 통합·유도속성 근거."},
+];
+
+const TOPICS=[1,2,3,4,5,6,7,8,9,10,11];
+const TNAME={1:"1장 DB 개요",2:"2장 논리·물리",3:"3장 모델링 개념",4:"4장 ERwin",5:"5장 업무분석·DFD",6:"6장 엔티티",7:"7장 식별자·관계",8:"참조무결성",9:"유도속성",10:"FK·참여수",11:"ERD 설계"};
+const TCHIP={1:"1장",2:"2장",3:"3장",4:"4장",5:"5장",6:"6장",7:"7장",8:"참조무결성",9:"유도속성",10:"FK·참여수",11:"ERD"};
+const TYPENAME={mc:"객관식",ox:"O / X",sa:"단답형",es:"서술형"};
+const $=s=>document.querySelector(s);
+const store={get(k,d){try{const v=localStorage.getItem(k);return v?JSON.parse(v):d}catch(e){return d}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}};
+
+let state=store.get("dbQuiz.v1",null)||{mode:"mock",topics:TOPICS.slice(),set:[],i:0,answers:{},reveal:{},drafts:{},wrongBank:[]};
+state.reveal=state.reveal||{};state.drafts=state.drafts||{};
+
+function shuffle(a){a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
+function pool(){return Q.filter(q=>state.topics.includes(q.t))}
+function build(){
+  const p=pool();let set;
+  if(state.mode==="mock"){
+    // 실제 시험처럼: 서술형 5 + 형광펜 위주 나머지 15
+    const E=shuffle(p.filter(q=>q.type==="es")),H=shuffle(p.filter(q=>q.type!=="es"&&q.h)),N=shuffle(p.filter(q=>q.type!=="es"&&!q.h));
+    const e=E.slice(0,5),rest=H.slice(0,11).concat(N.slice(0,4));
+    const fill=H.slice(11).concat(N.slice(4),E.slice(5));
+    set=e.concat(rest);while(set.length<20&&fill.length)set.push(fill.shift());
+    set=shuffle(set);
+  }else if(state.mode==="wrong"){
+    set=p.filter(q=>state.wrongBank.includes(q.id));
+  }else if(state.mode==="essay"){
+    set=p.filter(q=>q.type==="es");
+  }else set=p.slice();
+  state.set=set.map(q=>q.id);state.i=0;state.answers={};state.reveal={};
+  state.order={};set.forEach(q=>{if(q.type==="mc")state.order[q.id]=shuffle(q.c.map((_,k)=>k))});
+  save();render();
+}
+function save(){store.set("dbQuiz.v1",state)}
+const byId=id=>Q.find(q=>q.id===id);
+const norm=s=>String(s).toLowerCase().replace(/[\s,()\[\]·.]/g,"").replace(/개$|번$|회$/,"");
+const esc=s=>String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/"/g,"&quot;");
+
+function renderMeta(){
+  const nH=Q.filter(q=>q.h).length,nE=Q.filter(q=>q.type==="es").length;
+  $("#meta").innerHTML=`<span class="pill">문제 은행 ${Q.length}문항</span><span class="pill hl">형광펜 출제 포인트 ${nH}</span><span class="pill">서술형·ERD ${nE}</span><span class="pill">모의고사 = 서술형 5 + 형광펜 위주 15</span>`;
+}
+function renderControls(){
+  document.querySelectorAll("#modeSeg button").forEach(b=>b.setAttribute("aria-pressed",b.dataset.mode===state.mode));
+  const row=$("#chipRow");row.querySelectorAll(".chip").forEach(c=>c.remove());
+  TOPICS.forEach(t=>{const b=document.createElement("button");b.type="button";b.className="chip";b.textContent=TCHIP[t];b.title=TNAME[t];
+    b.setAttribute("aria-pressed",state.topics.includes(t));
+    b.onclick=()=>{const has=state.topics.includes(t);if(has&&state.topics.length===1)return;state.topics=has?state.topics.filter(x=>x!==t):state.topics.concat(t).sort((a,b)=>a-b);build()};
+    row.appendChild(b)});
+  const done=state.set.filter(id=>state.answers[id]).length,ok=state.set.filter(id=>state.answers[id]?.ok).length;
+  $("#progress").textContent=state.set.length?`${done} / ${state.set.length} 풀이 · 정답 ${ok}`:"";
+  const omr=$("#omr");omr.innerHTML="";
+  state.set.forEach((id,k)=>{const b=document.createElement("button");b.type="button";b.textContent=k+1;
+    const a=state.answers[id];if(a)b.classList.add(a.ok?"ok":"bad");if(k===state.i)b.classList.add("cur");
+    b.setAttribute("aria-label",`${k+1}번${a?(a.ok?" 정답":" 오답"):""}`);
+    b.onclick=()=>{state.i=k;save();render()};omr.appendChild(b)});
+  const rb=document.createElement("button");rb.type="button";rb.textContent="결과";rb.style.width="auto";rb.style.padding="0 10px";rb.style.borderRadius="15px";
+  if(state.i===state.set.length)rb.classList.add("cur");rb.onclick=()=>{state.i=state.set.length;save();render()};
+  if(state.set.length)omr.appendChild(rb);
+}
+
+function grade(q,val){
+  let ok,rec;
+  if(q.type==="mc"||q.type==="ox"){ok=val===q.ans;rec={pick:val,ok}}
+  else if(q.type==="sa"){ok=q.ans.map(norm).includes(norm(val));rec={text:val,ok}}
+  else{ok=val;rec={ok}}
+  state.answers[q.id]=rec;
+  const wb=new Set(state.wrongBank);ok?wb.delete(q.id):wb.add(q.id);state.wrongBank=[...wb];
+  save();render();
+}
+
+function renderQuestion(){
+  const st=$("#stage");
+  if(!state.set.length){st.innerHTML=`<div class="sheet"><p class="qtext">${state.mode==="wrong"?"아직 틀린 문제가 없습니다. 모의고사나 전체 문제를 먼저 풀어 보세요.":"선택한 범위에 문제가 없습니다. 범위를 더 골라 주세요."}</p></div>`;return}
+  if(state.i>=state.set.length){renderResult();return}
+  const q=byId(state.set[state.i]),a=state.answers[q.id],n=state.i+1;
+  const tag=q.h?`<span class="pill hl">형광펜</span>`:"";
+  let body="",fb="";
+  if(q.type==="mc"||q.type==="ox"){
+    const opts=q.type==="ox"?["O","X"]:q.c;
+    const ord=q.type==="ox"?[0,1]:((state.order&&state.order[q.id])||q.c.map((_,k)=>k));
+    body=`<ol class="choices${q.type==="ox"?" ox":""}">`+ord.map((orig,pos)=>{
+      let cls="choice";if(a){if(orig===q.ans)cls+=" right";else if(orig===a.pick)cls+=" wrong"}
+      return `<li><button type="button" class="${cls}" data-o="${orig}" ${a?"disabled":""}><span class="b">${pos+1}</span><span>${opts[orig]}</span></button></li>`}).join("")+`</ol>`;
+    if(a){const right=q.type==="ox"?`정답: ${opts[q.ans]}`:`정답: ${ord.indexOf(q.ans)+1}번`;
+      fb=`<div class="feedback ${a.ok?"ok":"bad"}"><strong>${a.ok?"정답":"오답 · "+right}</strong><div>${q.e}</div></div>`}
+  }else if(q.type==="sa"){
+    body=`<form class="short" id="saForm"><input id="sa-${q.id}" autocomplete="off" placeholder="답을 입력하세요" value="${a?esc(a.text):""}" ${a?"disabled":""} aria-label="답 입력"><button class="btn" ${a?"disabled":""}>채점</button></form>`;
+    if(a)fb=`<div class="feedback ${a.ok?"ok":"bad"}"><strong>${a.ok?"정답":"오답 · 정답: "+q.ans[0]}</strong><div>${q.e}</div></div>`;
+  }else{
+    const shown=state.reveal[q.id]||a;
+    body=`<div class="essay"><textarea id="es-${q.id}" placeholder="핵심어 위주로 답안을 써 보세요. ERD·DFD는 종이에 그린 뒤 모범답안을 여세요." aria-label="서술형 답안">${esc(state.drafts[q.id]||"")}</textarea>
+      ${shown?"":`<div class="row"><button type="button" class="btn" id="reveal">모범답안 보기</button></div>`}</div>`;
+    if(shown){
+      fb=`<div class="feedback model"><strong>모범답안</strong><div>${q.a}</div>
+        <div><b style="font-size:.85rem">채점 핵심어 — 내 답안에 있으면 체크</b><div class="kw">${q.kw.map((k,j)=>`<label><input type="checkbox" id="kw-${q.id}-${j}">${k}</label>`).join("")}</div></div></div>`;
+      fb+=a?`<div class="feedback ${a.ok?"ok":"bad"}"><strong>${a.ok?"맞힘으로 기록":"다시 볼 문제로 기록"}</strong></div>`
+        :`<div class="row"><button type="button" class="btn okb" id="selfOk">핵심어 다 썼다 (정답)</button><button type="button" class="btn badb" id="selfBad">빠뜨렸다 (오답)</button></div>`;
+    }
+  }
+  st.innerHTML=`<article class="sheet" aria-live="polite">
+    <div class="qhead"><span class="qnum">문항 ${String(n).padStart(2,"0")}</span><span class="row" style="gap:6px"><span class="pill">${TNAME[q.t]}</span>${tag}<span class="pill">${TYPENAME[q.type]}</span></span></div>
+    <div class="qtext">${q.q}</div>${body}${fb}
+    <div class="nav"><button type="button" class="btn ghost" id="prev" ${state.i===0?"disabled":""}>이전</button>
+    <button type="button" class="btn ${a?"":"ghost"}" id="next">${n===state.set.length?"결과 보기":"다음"}</button></div></article>`;
+  st.querySelectorAll(".choice").forEach(b=>b.onclick=()=>grade(q,+b.dataset.o));
+  const f=$("#saForm");if(f){f.onsubmit=e=>{e.preventDefault();const v=f.querySelector("input").value.trim();if(v)grade(q,v)}}
+  const ta=st.querySelector("textarea");if(ta)ta.oninput=()=>{state.drafts[q.id]=ta.value;save()};
+  const rv=$("#reveal");if(rv)rv.onclick=()=>{state.reveal[q.id]=true;save();render()};
+  const so=$("#selfOk");if(so)so.onclick=()=>grade(q,true);
+  const sb=$("#selfBad");if(sb)sb.onclick=()=>grade(q,false);
+  $("#prev").onclick=()=>{state.i--;save();render()};
+  $("#next").onclick=()=>{state.i++;save();render();window.scrollTo({top:0})};
+}
+
+function renderResult(){
+  const ids=state.set,ans=ids.map(id=>state.answers[id]);
+  const done=ans.filter(Boolean).length,ok=ans.filter(a=>a&&a.ok).length;
+  const pct=ids.length?Math.round(ok/ids.length*100):0;
+  const rows=[];
+  const line=(label,g)=>{if(!g.length)return;const c=g.filter(id=>state.answers[id]?.ok).length;
+    rows.push(`<span>${label}</span><span class="bar"><i style="width:${c/g.length*100}%"></i></span><span>${c}/${g.length}</span>`)};
+  TOPICS.forEach(t=>line(TNAME[t],ids.filter(id=>byId(id).t===t)));
+  line("<b>형광펜 출제 포인트</b>",ids.filter(id=>byId(id).h));
+  line("<b>서술형·ERD</b>",ids.filter(id=>byId(id).type==="es"));
+  const wrong=ids.map((id,k)=>({id,k})).filter(x=>!state.answers[x.id]?.ok);
+  $("#stage").innerHTML=`<section class="result">
+    <div><div class="score">${ok}<small> / ${ids.length} 정답 · ${pct}점</small></div>
+    <p class="hint" style="margin:6px 0 0">${done<ids.length?`아직 ${ids.length-done}문항을 풀지 않았습니다.`:"모든 문항을 풀었습니다."}</p></div>
+    <div class="bars">${rows.join("")}</div>
+    ${wrong.length?`<div><b>다시 볼 문항</b><ol class="wronglist">${wrong.map(x=>`<li><a href="#" data-k="${x.k}">${x.k+1}번</a> · ${byId(x.id).q.replace(/<br>[\s\S]*/,"").replace(/<[^>]+>/g,"").slice(0,60)}…</li>`).join("")}</ol></div>`:""}
+    <div class="row"><button type="button" class="btn" id="again">새 모의고사</button><button type="button" class="btn ghost" id="toWrong" ${state.wrongBank.length?"":"disabled"}>틀린 문제만 다시 풀기 (${state.wrongBank.length})</button></div>
+  </section>`;
+  $("#stage").querySelectorAll("a[data-k]").forEach(a=>a.onclick=e=>{e.preventDefault();state.i=+a.dataset.k;save();render()});
+  $("#again").onclick=()=>{state.mode="mock";build()};
+  $("#toWrong").onclick=()=>{state.mode="wrong";build()};
+}
+
+function render(){renderControls();renderQuestion()}
+document.querySelectorAll("#modeSeg button").forEach(b=>b.onclick=()=>{state.mode=b.dataset.mode;build()});
+$("#reshuffle").onclick=build;
+renderMeta();
+if(!state.set.length||state.set.some(id=>!byId(id)))build();else render();
+</script>
+
+</body></html>
